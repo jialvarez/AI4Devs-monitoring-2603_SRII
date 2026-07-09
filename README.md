@@ -1,3 +1,47 @@
+# Ejercicio de Monitorización: Integración AWS-Datadog (Máster de IA)
+
+Esta sección documenta el trabajo realizado sobre el código Terraform del directorio [`tf/`](./tf) para instrumentar la infraestructura AWS existente (2 instancias EC2, backend y frontend) con Datadog.
+
+## Resumen de cambios
+
+### 1. Configuración base del provider de Datadog
+
+- [`tf/provider.tf`](./tf/provider.tf): bloque `terraform { required_providers }` con los providers `aws` y `datadog`, y el bloque `provider "datadog"` configurado con `api_key`, `app_key` y `api_url` parametrizados.
+- [`tf/variables.tf`](./tf/variables.tf): variables `datadog_api_key` y `datadog_app_key` (marcadas `sensitive = true`, **sin valor por defecto**) y `datadog_api_url` (con default configurable según la región de la cuenta Datadog, US o EU).
+- Los valores reales se inyectan localmente mediante `tf/terraform.tfvars`, que **no se versiona** (está en `.gitignore`); se incluye `tf/terraform.tfvars.example` como plantilla sin secretos.
+
+### 2. Integración nativa AWS ↔ Datadog
+
+- [`tf/datadog_integration.tf`](./tf/datadog_integration.tf): implementa la integración a nivel de cuenta mediante el recurso `datadog_integration_aws_account` (el reemplazo actual del recurso `datadog_integration_aws`, deprecado en la versión del provider usada).
+  - Datadog registra la cuenta AWS y genera un `external_id`.
+  - Se crea un `aws_iam_role` cuya trust policy solo permite `sts:AssumeRole` al principal fijo de Datadog (`arn:aws:iam::464622532012:root`), condicionado a que el `sts:ExternalId` coincida con el generado por Datadog.
+  - Se adjunta al rol una `aws_iam_policy` con los permisos mínimos estándar para lectura de métricas (`cloudwatch:Describe*/Get*/List*`, `ec2:Describe*`, `tag:Get*`).
+  - El nombre del rol y las regiones a monitorizar son parametrizables vía variables (`datadog_aws_integration_role_name`, `datadog_aws_integration_included_regions`).
+
+### 3. Agente Datadog en las instancias EC2
+
+- [`tf/ec2.tf`](./tf/ec2.tf) y [`tf/scripts/backend_user_data.sh`](./tf/scripts/backend_user_data.sh) / [`tf/scripts/frontend_user_data.sh`](./tf/scripts/frontend_user_data.sh): el `user_data` de ambas instancias instala el Datadog Agent 7 mediante el instalador oficial (`install.datadoghq.com`), habilita y arranca el servicio (`systemctl enable/start datadog-agent`).
+- La API Key y el site de Datadog (`DD_API_KEY`, `DD_SITE`) se inyectan de forma dinámica en el script vía `templatefile()`, a partir de `var.datadog_api_key` y de un valor derivado de `var.datadog_api_url` — nunca hardcodeados en el script.
+
+### 4. Dashboards
+
+- [`tf/main.tf`](./tf/main.tf): dashboard `EC2 Monitoring Dashboard` con CPU / Network In / Network Out de todas las instancias.
+- [`tf/datadog_dashboards.tf`](./tf/datadog_dashboards.tf): dashboard `AWS Infrastructure & EC2 Monitor`, filtrado específicamente por el tag `name:lti-project-*` de nuestras instancias, con 4 widgets: uso de CPU, status check (salud de la instancia), créditos de CPU (instancias `t2`) y una nota de texto indicando que el dashboard se generó automáticamente vía Terraform en el Máster de IA.
+
+## Capturas
+
+![Applying Terraform](./capturas/terraform-apply.png)
+![Integración AWS en Datadog](./capturas/integracion-aws.png)
+![Dashboard Datadog - EC2 Monitoring Dashboard](./capturas/dashboard.png)
+![Dashboard Datadog - AWS Infrastructure & EC2 Monitor](./capturas/dashboard-aws-infra.png)
+
+## Desafíos y Soluciones
+
+**Inyección segura de la API Key en el `user_data`.** El script de arranque original de las instancias contenía la API Key de Datadog hardcodeada en texto plano y, además, la línea de instalación del agente estaba mal formada (`export DD_SITE=... bash -c "..."`), por lo que el agente nunca llegaba a instalarse pese a que el código lo aparentaba. Se resolvió pasando la key como variable de Terraform marcada `sensitive`, sin valor por defecto, inyectándola en el script mediante `templatefile()` (el mismo mecanismo ya usado para el timestamp de forzado de despliegue) en lugar de interpolación de cadenas manual. La key en sí se mantiene fuera de git en todo momento: vive únicamente en `terraform.tfvars` (excluido vía `.gitignore` junto con `*.tfstate`, que por error había quedado versionado con estado de una cuenta AWS distinta a la de destino).
+
+**Gestión de permisos IAM.** Se optó por el flujo de integración "account-level" moderno de Datadog (`datadog_integration_aws_account`) en lugar del recurso legacy, y por una política de permisos mínima y explícita (solo lectura de CloudWatch/EC2/tags) en vez de la política completa "de todo" que ofrece el asistente de la consola de Datadog (que incluye decenas de permisos adicionales para CSPM, X-Ray, forwarding de logs vía Lambda, etc., innecesarios para este ejercicio). El acceso del rol está además condicionado por `external_id`, evitando el problema del "confused deputy" en la relación de confianza entre cuentas. Durante el proceso también se detectó que las credenciales AWS activas apuntaban a una cuenta y usuario distintos a los del alumno (sin permisos IAM suficientes); una vez corregido el perfil de AWS CLI a la cuenta personal, la integración y el resto de recursos se desplegaron sin fricción.
+
+
 # LTI - Talent Tracking System  | EN
 
 This project is a full-stack application with a React frontend and an Express backend using Prisma as an ORM. The frontend is initiated with Create React App, and the backend is written in TypeScript.
@@ -323,5 +367,4 @@ POST http://localhost:3010/candidates
     }
 }
 ```
-
 

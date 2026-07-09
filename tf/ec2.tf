@@ -1,3 +1,8 @@
+# DD_SITE (p.ej. "datadoghq.eu") a partir de datadog_api_url (p.ej. "https://api.datadoghq.eu")
+locals {
+  datadog_site = replace(var.datadog_api_url, "https://api.", "")
+}
+
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -14,10 +19,14 @@ data "aws_ami" "amazon_linux" {
 }
 
 resource "aws_instance" "backend" {
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = "t2.micro"
-  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
-  user_data              = templatefile("scripts/backend_user_data.sh", { timestamp = timestamp() })
+  ami                  = data.aws_ami.amazon_linux.id
+  instance_type        = "t2.micro"
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  user_data = templatefile("scripts/backend_user_data.sh", {
+    timestamp  = timestamp()
+    dd_api_key = var.datadog_api_key
+    dd_site    = local.datadog_site
+  })
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   tags = {
     Name    = "lti-project-backend"
@@ -26,10 +35,14 @@ resource "aws_instance" "backend" {
 }
 
 resource "aws_instance" "frontend" {
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = "t2.medium"
-  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
-  user_data              = templatefile("scripts/frontend_user_data.sh", { timestamp = timestamp() })
+  ami                  = data.aws_ami.amazon_linux.id
+  instance_type        = "t2.small"
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  user_data = templatefile("scripts/frontend_user_data.sh", {
+    timestamp  = timestamp()
+    dd_api_key = var.datadog_api_key
+    dd_site    = local.datadog_site
+  })
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
   tags = {
     Name    = "lti-project-frontend"

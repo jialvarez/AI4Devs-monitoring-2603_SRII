@@ -15,3 +15,15 @@ variable "datadog_api_url" {
   type        = string
   default     = "https://api.us5.datadoghq.com"
 }
+
+variable "datadog_aws_integration_role_name" {
+  description = "Nombre del rol IAM que la integración nativa de Datadog asumirá en esta cuenta AWS"
+  type        = string
+  default     = "DatadogIntegrationRole"
+}
+
+variable "datadog_aws_integration_included_regions" {
+  description = "Regiones AWS que Datadog debe monitorizar. Vacío = todas las regiones (include_all)."
+  type        = list(string)
+  default     = []
+}

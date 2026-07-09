@@ -1,9 +1,11 @@
 #!/bin/bash
 yum update -y
 yum install -y docker
-export DD_AGENT_MAJOR_VERSION=7 
-export DD_API_KEY='76cd5e07d41cec7b205a01ffbc26c5ae'
-export DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+
+# Instalar y arrancar el Datadog Agent (API Key inyectada por Terraform)
+DD_API_KEY="${dd_api_key}" DD_SITE="${dd_site}" DD_AGENT_MAJOR_VERSION=7 bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+systemctl enable datadog-agent
+systemctl start datadog-agent
 
 # Iniciar el servicio de Docker
 service docker start

@@ -16,6 +16,7 @@
 **/*.tfplan
 **/*.tfstate
 **/*.tfstate.*
+**/plan_to_apply.log
 
 # other dependencies
 **/.pnp

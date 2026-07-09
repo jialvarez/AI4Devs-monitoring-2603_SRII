@@ -91,8 +91,7 @@ Una vez que Claude Code haya aplicado y probado todo, puedes pedirle que te gene
 ```text
 ¡Excelente trabajo con el código! Ahora vamos a documentar el ejercicio tal y como pide el enunciado.
 
-1. Crea la carpeta `prompts/` si no existe, y dentro genera el archivo `datadog-aws-prompts.md`. En él, documenta de forma estructurada y limpia todos los prompts que hemos utilizado a lo largo de esta sesión para generar el código de Terraform, explicando brevemente qué hacía cada uno.
-2. Actualiza el archivo `README.md` de la raíz incluyendo:
+Para esto, actualiza el archivo `README.md` de la raíz incluyendo:
    - Una sección explicando detalladamente todos los cambios que hemos realizado (Integración AWS-Datadog, agente en EC2, variables y dashboard).
    - Añade los placeholders tradicionales para las capturas de pantalla de la entrega (`![Dashboard Datadog](./capturas/dashboard.png)`).
    - Una sección de "Desafíos y Soluciones" que resuma de forma profesional cómo abordamos la inyección de la API key de forma segura en el user_data y la gestión de permisos IAM.
