@@ -6,7 +6,16 @@
 **/prompts_master.md
 
 **/.terraform/
-**/.terraform.lock.hcl  
+**/.terraform.lock.hcl
+
+# terraform secrets
+**/*.tfvars
+**/*.tfvars.json
+!**/*.tfvars.example
+**/tfplan
+**/*.tfplan
+**/*.tfstate
+**/*.tfstate.*
 
 # other dependencies
 **/.pnp
@@ -29,3 +38,4 @@ yarn-error.log*
 .vscode
 
 # .env
+.serena/

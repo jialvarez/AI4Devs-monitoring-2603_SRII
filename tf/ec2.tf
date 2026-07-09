@@ -20,8 +20,8 @@ resource "aws_instance" "backend" {
   user_data              = templatefile("scripts/backend_user_data.sh", { timestamp = timestamp() })
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
   tags = {
-    Name = "lti-project-backend"
-    Datadog     = "true"
+    Name    = "lti-project-backend"
+    Datadog = "true"
   }
 }
 
@@ -32,8 +32,8 @@ resource "aws_instance" "frontend" {
   user_data              = templatefile("scripts/frontend_user_data.sh", { timestamp = timestamp() })
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
   tags = {
-    Name = "lti-project-frontend"
-    Datadog     = "true"
+    Name    = "lti-project-frontend"
+    Datadog = "true"
   }
 }
 
