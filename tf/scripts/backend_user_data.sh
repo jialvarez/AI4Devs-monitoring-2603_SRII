@@ -12,7 +12,7 @@ yum install -y docker
 service docker start
 
 # Descargar y descomprimir el archivo backend.zip desde S3
-aws s3 cp s3://lti-project-code-bucket/backend.zip /home/ec2-user/backend.zip
+aws s3 cp s3://${s3_bucket}/backend.zip /home/ec2-user/backend.zip
 unzip /home/ec2-user/backend.zip -d /home/ec2-user/
 
 # Construir la imagen Docker para el backend

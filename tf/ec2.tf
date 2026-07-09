@@ -26,8 +26,10 @@ resource "aws_instance" "backend" {
     timestamp  = timestamp()
     dd_api_key = var.datadog_api_key
     dd_site    = local.datadog_site
+    s3_bucket  = aws_s3_bucket.code_bucket.bucket
   })
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
+  depends_on             = [aws_s3_bucket_object.backend_zip]
   tags = {
     Name    = "lti-project-backend"
     Datadog = "true"
@@ -42,8 +44,10 @@ resource "aws_instance" "frontend" {
     timestamp  = timestamp()
     dd_api_key = var.datadog_api_key
     dd_site    = local.datadog_site
+    s3_bucket  = aws_s3_bucket.code_bucket.bucket
   })
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]
+  depends_on             = [aws_s3_bucket_object.frontend_zip]
   tags = {
     Name    = "lti-project-frontend"
     Datadog = "true"

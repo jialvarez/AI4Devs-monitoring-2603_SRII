@@ -11,7 +11,7 @@ systemctl start datadog-agent
 service docker start
 
 # Descargar y descomprimir el archivo frontend.zip desde S3
-aws s3 cp s3://lti-project-code-bucket/frontend.zip /home/ec2-user/frontend.zip
+aws s3 cp s3://${s3_bucket}/frontend.zip /home/ec2-user/frontend.zip
 unzip /home/ec2-user/frontend.zip -d /home/ec2-user/
 
 # Construir la imagen Docker para el frontend

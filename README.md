@@ -34,6 +34,7 @@ Esta sección documenta el trabajo realizado sobre el código Terraform del dire
 ![Integración AWS en Datadog](./capturas/integracion-aws.png)
 ![Dashboard Datadog - EC2 Monitoring Dashboard](./capturas/dashboard.png)
 ![Dashboard Datadog - AWS Infrastructure & EC2 Monitor](./capturas/dashboard-aws-infra.png)
+![Aplicación corriendo en EC2](./capturas/app-running.png)
 
 ## Desafíos y Soluciones
 
